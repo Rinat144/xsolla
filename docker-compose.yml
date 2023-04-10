@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+    nginx:
+        image: nginx:latest
+        ports:
+            - "83:80"
+            - "443:443"
+        volumes:
+            - ./docker/nginx:/etc/nginx/conf.d
+            - ./:/var/www
+            - ./docker/logs:/var/log/nginx
+        links:
+            - php
+    php:
+        build: ./docker/php
+        volumes:
+            - ./:/var/www
+        links:
+            - postgres
+
+    postgres:
+        image: postgres:14.3
+        environment:
+            POSTGRES_DB: "xsolla"
+            POSTGRES_USER: "sail"
+            POSTGRES_PASSWORD: "password"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./docker/postgres/:/docker-entrypoint-initdb.d/
+            - ./docker/data:/var/lib/postgresql/data
+
+networks:
+    default:
+        driver: bridge
